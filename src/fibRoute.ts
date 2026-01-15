@@ -1,24 +1,20 @@
 import { Request, Response } from 'express';
 import fibonacci from "./fib";
 
-// Define an interface for the query parameters to avoid 'any'
-interface FibQuery {
-  num?: string;
+// Define the shape of the path parameters
+interface RouteParams {
+  num: string;
 }
 
-export default (req: Request<unknown, unknown, unknown, FibQuery>, res: Response): void | Response => {
-  // Now 'num' is typed as 'string | undefined' instead of 'any'
-  const { num } = req.query; 
+export default (req: Request<RouteParams>, res: Response): void | Response => {
+  // Access the number from the URL path (e.g., /fib/8)
+  const { num } = req.params; 
 
-  // 1. Validation: Ensure 'num' is a string and not empty
-  if (typeof num !== 'string') {
-    return res.status(400).send("Please provide a 'num' query parameter.");
-  }
-
+  // 1. Validation: num will be a string because of the route definition
   const parsedNum = parseInt(num, 10);
 
   if (isNaN(parsedNum)) {
-    return res.status(400).send("Please provide a valid number.");
+    return res.status(400).send("Please provide a valid number in the URL path.");
   }
 
   // 2. Calculation
