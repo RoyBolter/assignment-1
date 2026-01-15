@@ -1,12 +1,20 @@
-// Endpoint for querying the fibonacci numbers
+import { Request, Response } from 'express';
 import fibonacci from "./fib";
 
-export default (req, res) => {
-  // Use req.query for URL parameters like ?num=5
-  // Use req.params if your route is defined as /fibonacci/:num
+// Define an interface for the query parameters to avoid 'any'
+interface FibQuery {
+  num?: string;
+}
+
+export default (req: Request<unknown, unknown, unknown, FibQuery>, res: Response): void | Response => {
+  // Now 'num' is typed as 'string | undefined' instead of 'any'
   const { num } = req.query; 
 
-  // 1. Validation: Ensure num exists and is a valid integer
+  // 1. Validation: Ensure 'num' is a string and not empty
+  if (typeof num !== 'string') {
+    return res.status(400).send("Please provide a 'num' query parameter.");
+  }
+
   const parsedNum = parseInt(num, 10);
 
   if (isNaN(parsedNum)) {
@@ -14,13 +22,12 @@ export default (req, res) => {
   }
 
   // 2. Calculation
-  const fibN = fibonacci(parsedNum);
+  const fibN: number = fibonacci(parsedNum);
 
   // 3. Logic Handling
-  // If your fibonacci function returns -1 or null for negative inputs
-  if (fibN === null || fibN < 0) {
+  if (fibN < 0) {
     return res.send(`fibonacci(${parsedNum}) is undefined`);
   }
 
-  res.send(`fibonacci(${parsedNum}) is ${fibN}`);
+  return res.send(`fibonacci(${parsedNum}) is ${fibN}`);
 };
