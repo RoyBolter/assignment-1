@@ -1,16 +1,29 @@
-// Endpoint for querying the fibonacci numbers
-
+import { Request, Response } from 'express';
 import fibonacci from "./fib";
 
-export default (req, res) => {
-  const { num } = req.params;
+// Define the shape of the path parameters
+interface RouteParams {
+  num: string;
+}
 
-  const fibN = fibonacci(parseInt(num));
-  let result = `fibonacci(${num}) is ${fibN}`;
+export default (req: Request<RouteParams>, res: Response): void | Response => {
+  // Access the number from the URL path (e.g., /fib/8)
+  const { num } = req.params; 
 
-  if (fibN < 0) {
-    result = `fibonacci(${num}) is undefined`;
+  // 1. Validation: num will be a string because of the route definition
+  const parsedNum = parseInt(num, 10);
+
+  if (isNaN(parsedNum)) {
+    return res.status(400).send("Please provide a valid number in the URL path.");
   }
 
-  res.send(result);
+  // 2. Calculation
+  const fibN: number = fibonacci(parsedNum);
+
+  // 3. Logic Handling
+  if (fibN < 0) {
+    return res.send(`fibonacci(${parsedNum}) is undefined`);
+  }
+
+  return res.send(`fibonacci(${parsedNum}) is ${fibN}`);
 };
